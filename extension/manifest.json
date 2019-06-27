@@ -1,0 +1,29 @@
+{
+	"name": "Immediate Shot",
+	"version": "0.0.3",
+	"description": "Immediate Shot is a Chrome Extension that takes screenshots quickly with one click.",
+	"background": {
+		"persistent": false,
+		"scripts": ["background.bundle.js"]
+	},
+	"content_scripts": [{
+		"js": ["page.bundle.js"],
+		"matches": ["http://*/*", "https://*/*"]
+	}],
+	"browser_action": {
+		"default_icon": {
+			"128": "128.png"
+		}
+	},
+	"icons": {
+		"128": "128.png",
+		"48": "48.png",
+		"32": "32.png"
+	},
+	"permissions": ["activeTab", "tabs", "storage", "background"],
+	"options_ui": {
+		"page": "options.html",
+		"chrome_style": true
+	},
+	"manifest_version": 2
+}

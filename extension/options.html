@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Noji Shot Extension Options</title>
+  <style>
+    li{
+      margin-top: 15px;
+    }
+    li:first-child{
+      margin-top: 0;
+    }
+    input[type=text], input[type=number]{
+      border-radius: 5px;
+      padding: 0 5px;
+    }
+    input[type=number]{
+      max-width: 40px;
+    }
+    input[type=radio]{
+      margin: 5px;
+      position: relative;
+      top: -2px;
+    }
+  </style>
+</head>
+<body>
+<ul>
+  <li>
+    <spna>Capture range: </spna>
+    <label>Full<input id="full" name="range" type="radio" value="full"></label>
+    <label>Display<input id="display" name="range" type="radio" value="display"></label>
+  </li>
+  <li>
+    <label>
+      <span>File name: </span>
+      <input id="title" name="title" type="text" value="" placeholder="capture">.png
+    </label>
+    <p>templates</p>
+    <p>{{title}}: Replaced with title tag of target page.</p>
+    <p>{{url}}: Replaced with URL of target page.</p>
+    <p>{{counter}}: Replaced by 'counter' below. It will be incremented each time it is called.</p>
+  </li>
+  <li>
+    <label>
+      <span>File name counter(use '{{counter}}' by File name.): </span>
+      <input id="counter" type="number" name="counter" min="0" value="0">
+    </label>
+  </li>
+</ul>
+<button id="save">save</button><span id="status"></span>
+<script src="options.bundle.js"></script>
+</body>
+</html>
