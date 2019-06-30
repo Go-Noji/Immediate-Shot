@@ -28,13 +28,15 @@ export class Sizing {
 
   /**
    * style タグを挿入する
-   * 既にこのクラスが扱っている style が存在した場合はリセットする
+   * 既にこのクラスが扱っている style が存在した場合はなにもしない
    * @param style
    * @private
    */
   _appendStyle(style) {
-    //リセット
-    this._removeStyle();
+    //既に style タグがあれば何もしない
+    if (this._isStyle()) {
+      return;
+    }
 
     //style タグを用意
     const tag = document.createElement('style');
@@ -76,11 +78,11 @@ export class Sizing {
     this.ratio = ratio > 1 ? 1 : Number(ratio);
 
     //縦と横においてそれぞれ現在のウィンドウサイズ何枚分で全画面を捕捉できるかの数値を算出
-    this.widthCaptureNumber = Math.ceil(this.documentWidth / this.windowWidth);
-    this.heightCaptureNumber = Math.ceil(this.documentHeight / this.windowHeight);
+    this.columnNumber = Math.ceil(this.documentWidth / this.windowWidth);
+    this.rowNumber = Math.ceil(this.documentHeight / this.windowHeight);
 
     //上記二つの乗算値
-    this.captureNumber = this.widthCaptureNumber * this.heightCaptureNumber;
+    this.captureNumber = this.columnNumber * this.rowNumber;
 
     //二つの変数をセット
     this.ratio = ratio;
@@ -104,8 +106,8 @@ export class Sizing {
       windowHeight: this.windowHeight,
       documentWidth: this.documentWidth,
       documentHeight: this.documentHeight,
-      widthCaptureNumber: this.widthCaptureNumber,
-      heightCaptureNumber: this.heightCaptureNumber,
+      columnNumber: this.columnNumber,
+      rowNumber: this.rowNumber,
       captureNumber: this.captureNumber,
       ratio: this.ratio,
       ratioType: this.ratioType
@@ -132,7 +134,7 @@ export class Sizing {
 
     //スクロール指定があればその位置までスクロール
     if (scrollIndex !== null) {
-      window.scrollTo(Math.floor(scrollIndex % this.widthCaptureNumber) % this.captureNumber * this.windowWidth, Math.floor(scrollIndex / this.widthCaptureNumber) % this.captureNumber * this.windowHeight);
+      window.scrollTo(Math.floor(scrollIndex % this.columnNumber) % this.captureNumber * this.windowWidth, Math.floor(scrollIndex / this.columnNumber) % this.captureNumber * this.windowHeight);
     }
   }
 
