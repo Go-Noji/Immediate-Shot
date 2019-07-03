@@ -1,42 +1,69 @@
+import {Information} from "./interface";
+
 export class Sizing {
 
-  /**
-   * このクラスが仕込んだスタイルが存在するか判定
-   * @return {boolean}
-   * @private
-   */
-  _isStyle() {
-    //対象の選定
-    const target = document.getElementById(this.STYLE_ID);
+  //constructor() 時点の window width
+  readonly windowWidth: number;
 
-    //対象が存在するか判定
-    return target !== null;
-  }
+  //constructor() 時点の window height
+  readonly windowHeight: number;
+
+  //constructor() 時点の document width
+  readonly documentWidth: number;
+
+  //constructor() 時点の document height
+  readonly documentHeight: number;
+
+  //画面縮小比率
+  readonly ratio: number;
+
+  //画面を幅と高さのどちらで縮小したか
+  readonly ratioType: 'width' | 'height';
+
+  //documentWidth を現在の windowWidth の大きさでキャプチャするには横に何枚キャプチャが必要か
+  readonly widthCaptureNumber: number;
+
+  //documentHeight を現在の windowHeight の大きさでキャプチャするには縦に何枚キャプチャが必要か
+  readonly heightCaptureNumber: number;
+
+  //上記二つの乗算値
+  readonly captureNumber: number;
+
+  //constructor() 時点のスクロール位置(横)
+  readonly scrollX: number;
+
+  //constructor() 時点のスクロール位置(縦)
+  readonly scrollY: number;
+
+  //このクラスが扱う <style> タグの id 属性値
+  readonly STYLE_ID: string;
 
   /**
    * このクラスが仕込んだ style タグを削除する
    * @private
    */
-  _removeStyle() {
-    if ( ! this._isStyle()) {
+  private _removeStyle() {
+    //削除対象の取得
+    const target = document.getElementById(this.STYLE_ID);
+
+    //target が存在しなかったら何もしない
+    if (target === null) {
       return;
     }
 
     //対象を削除する
-    document.getElementById(this.STYLE_ID).remove();
+    target.remove();
   }
 
   /**
    * style タグを挿入する
-   * 既にこのクラスが扱っている style が存在した場合はなにもしない
+   * 既にこのクラスが扱っている style が存在した場合はリセットする
    * @param style
    * @private
    */
-  _appendStyle(style) {
-    //既に style タグがあれば何もしない
-    if (this._isStyle()) {
-      return;
-    }
+  private _appendStyle(style: string) {
+    //リセット
+    this._removeStyle();
 
     //style タグを用意
     const tag = document.createElement('style');
@@ -51,7 +78,7 @@ export class Sizing {
    * 各サイズ情報を取得・計算・保持する
    * 加えて必用な定数も保管する
    */
-  constructor() {
+  public constructor() {
     //ウィンドウサイズ
     this.windowWidth = window.innerWidth;
     this.windowHeight = window.innerHeight;
@@ -64,29 +91,19 @@ export class Sizing {
     const widthRatio = this.windowWidth / this.documentWidth;
     const heightRatio = this.windowHeight / this.documentHeight;
 
-    //一旦幅の方をより小さい割合とする
-    let ratio = widthRatio;
-    let ratioType = 'width';
-
-    //高さの方が小さい割合だったら上記二つの変数を書き換える
-    if (widthRatio > heightRatio) {
-      ratio = heightRatio;
-      ratioType = 'height';
-    }
+    //ratio と ratioType のセット
+    this.ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+    this.ratioType = widthRatio > heightRatio ? 'height' : 'width';
 
     //ratio が 1 以上だったら 1 とする
-    this.ratio = ratio > 1 ? 1 : Number(ratio);
+    this.ratio = this.ratio > 1 ? 1 : this.ratio;
 
     //縦と横においてそれぞれ現在のウィンドウサイズ何枚分で全画面を捕捉できるかの数値を算出
-    this.columnNumber = Math.ceil(this.documentWidth / this.windowWidth);
-    this.rowNumber = Math.ceil(this.documentHeight / this.windowHeight);
+    this.widthCaptureNumber = Math.ceil(this.documentWidth / this.windowWidth);
+    this.heightCaptureNumber = Math.ceil(this.documentHeight / this.windowHeight);
 
     //上記二つの乗算値
-    this.captureNumber = this.columnNumber * this.rowNumber;
-
-    //二つの変数をセット
-    this.ratio = ratio;
-    this.ratioType = ratioType;
+    this.captureNumber = this.widthCaptureNumber * this.heightCaptureNumber;
 
     //現在のスクロール座標を記録
     this.scrollX = window.scrollX;
@@ -100,14 +117,14 @@ export class Sizing {
    * 情報を返す
    * @return {{documentWidth: number | *, documentHeight: number | *, windowHeight: number | *, ratioType: string, windowWidth: number | *, ratio: (*|number)}}
    */
-  getInformation() {
+  public getInformation(): Information {
     return {
       windowWidth: this.windowWidth,
       windowHeight: this.windowHeight,
       documentWidth: this.documentWidth,
       documentHeight: this.documentHeight,
-      columnNumber: this.columnNumber,
-      rowNumber: this.rowNumber,
+      widthCaptureNumber: this.widthCaptureNumber,
+      heightCaptureNumber: this.heightCaptureNumber,
       captureNumber: this.captureNumber,
       ratio: this.ratio,
       ratioType: this.ratioType
@@ -117,9 +134,9 @@ export class Sizing {
   /**
    * フルサイズ用のサイジング処理を行う
    */
-  fullSizing() {
+  public fullSizing() {
     //style タグを生成
-    this._appendStyle('body,html{overflow:hidden}html{transform-origin: left top;transform: scale('+this.ratio+')}');
+    this._appendStyle('body{overflow:hidden;transform-origin: left top;transform: scale('+this.ratio+')}');
 
     //スクロール位置を 0 にする
     window.scrollTo(0, 0);
@@ -128,13 +145,13 @@ export class Sizing {
   /**
    * スクロールバーを消すだけのサイジング処理を行う
    */
-  standardSizing(scrollIndex = null) {
+  public standardSizing(scrollIndex: number|null = null) {
     //style タグを生成
     this._appendStyle('body,html{overflow:hidden}');
 
     //スクロール指定があればその位置までスクロール
     if (scrollIndex !== null) {
-      window.scrollTo(Math.floor(scrollIndex % this.columnNumber) % this.captureNumber * this.windowWidth, Math.floor(scrollIndex / this.columnNumber) % this.captureNumber * this.windowHeight);
+      window.scrollTo(Math.floor(scrollIndex % this.widthCaptureNumber) % this.captureNumber * this.windowWidth, Math.floor(scrollIndex / this.widthCaptureNumber) % this.captureNumber * this.windowHeight);
     }
   }
 
@@ -142,7 +159,7 @@ export class Sizing {
    * サイジングのリセット
    * スクロール位置もリセットする
    */
-  resetSizing() {
+  public resetSizing() {
     //style のリセット
     this._removeStyle();
 

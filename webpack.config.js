@@ -3,10 +3,10 @@ const MODE = 'development';
 module.exports = {
 	mode: MODE,
 	entry: {
-		background: "./src/background.js",
-		inner: "./src/inner.js",
-		options: "./src/options.js",
-		page: "./src/page.js",
+		background: "./src/background.ts",
+		inner: "./src/inner.ts",
+		options: "./src/options.ts",
+		page: "./src/page.ts",
 	},
 	output: {
 		filename: '[name].bundle.js',
@@ -16,16 +16,12 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
-				use: [
-					{
-						loader: "babel-loader",
-						options: {
-							presets: ['@babel/preset-env']
-						}
-					}
-				]
+				test: /\.ts$/,
+        use: "ts-loader"
 			}
 		]
-	}
+	},
+  resolve: {
+    extensions: [".ts"]
+  }
 };

@@ -1,7 +1,14 @@
 /**
  * URL 履歴を取りため、クエリ文字列を扱いやすいようにパースするクラス
  */
+import {History, Histories, QueryPare} from "./interface";
+
 export class Queries {
+
+  /**
+   * URL 履歴
+   */
+  private histories: Histories = {};
 
   /**
    * 渡されたクエリ文字列をパースしてキー:バリューの形にする
@@ -10,9 +17,9 @@ export class Queries {
    * @return Object
    * @private
    */
-  _parseQueries(string) {
+  private _parseQueries(string: string): QueryPare {
     //このメソッドが返すオブジェクト
-    let queries = {};
+    let queries: QueryPare = {};
 
     //? が含まれていたらそれより前を削除
     if (string.indexOf('?') !== -1) {
@@ -49,7 +56,7 @@ export class Queries {
    * @return {Object}
    * @private
    */
-  _getLatestHistory() {
+  private _getLatestHistory() {
     return this.histories[Math.max(...Object.keys(this.histories).map(value => Number(value)))];
   }
 
@@ -61,7 +68,7 @@ export class Queries {
    * @param url
    * @private
    */
-  _addHistory(url = '') {
+  private _addHistory(url: string = '') {
     //url が空文字だったらこの時点での window.location.href をセットする
     url = url === ''
       ? window.location.href
@@ -78,20 +85,14 @@ export class Queries {
       return;
     }
 
-    //クエリをパースしたオブジェクトを用意
-    const queries = this._parseQueries(url);
-
     //現在のタイムスタンプ(ミリ秒単位)に url をセット
-    this.histories[new Date().getTime()] = {url, queries};
+    this.histories[new Date().getTime()] = {url, queries: this._parseQueries(url)};
   }
 
   /**
    * histories の設定
    */
-  constructor() {
-    //タイムスタンプ: {url: string, queries{string: string, ...}} の形で保存される
-    this.histories = {};
-
+  public constructor() {
     //この時点の履歴を記録しておく
     this._addHistory();
   }
@@ -100,7 +101,7 @@ export class Queries {
    * histories を返す
    * @return {{}|*}
    */
-  getHistories() {
+  public getHistories(): Histories {
     return this.histories;
   }
 
@@ -110,7 +111,7 @@ export class Queries {
    * @param timestamp
    * @return {Object}
    */
-  getHistory() {
+  public getHistory(): History {
     return this._getLatestHistory();
   }
 
@@ -119,7 +120,7 @@ export class Queries {
    * 内部的には this._addHistory(url) と同義
    * @param url
    */
-  setHistory(url = '') {
+  public setHistory(url: string = '') {
     this._addHistory(url);
   }
 

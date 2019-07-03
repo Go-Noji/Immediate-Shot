@@ -18,19 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
       range: 'full',
       title: '{{title}}',
       counter: 0
-    }, function(items) {
+    }, (items: {[key: string]: string}) => {
       //ファイル名変換用クラス
       const filename = new Filename();
 
       //ファイル名テンプレート変数文字列登録
-      if (items.title.indexOf('{{title}}') !== -1) {
+      if (typeof query.queries.title === 'string' && items.title.indexOf('{{title}}') !== -1) {
         filename.setTemplate('{{title}}', decodeURIComponent(query.queries.title));
       }
-      if (items.title.indexOf('{{url}}') !== -1) {
+      if (typeof query.queries.url === 'string' && items.title.indexOf('{{url}}') !== -1) {
         filename.setTemplate('{{url}}', query.queries.url.replace(/https?:\/\//, ''));
       }
       if (items.title.indexOf('{{counter}}') !== -1) {
-        filename.setTemplate('{{counter}}', items.counter);
+        filename.setTemplate('{{counter}}', String(items.counter));
         items.counter = items.counter + 1;
       }
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.setAttribute('download', filename.getFileName(items.title)+'.png');
 
       //リンク先に src の値を仕込む
-      link.setAttribute('href', query.queries.src);
+      link.setAttribute('href', typeof query.queries.src === 'string' ? query.queries.src : '');
 
       //クリックイベントを発火
       link.dispatchEvent(new MouseEvent('click'));
