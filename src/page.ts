@@ -1,5 +1,5 @@
-import {Range} from "./interface";
-import {Sizing} from "./Sizing";
+import {Range, Coordinates} from "./class/interface";
+import {Sizing} from "./class/Sizing";
 
 window.addEventListener('load', () => {
 
@@ -15,20 +15,27 @@ window.addEventListener('load', () => {
 
   //ブラウザの大きさを適切なものに変える
   const styling = (range: Range, index: number) => {
+    //処理終了後の座標情報
+    let coordinate: Coordinates = {
+      x: 0,
+      y: 0
+    };
+
+    //range によって処理を分ける
     switch (range) {
       case 'full':
-        sizing.fullSizing();
-        break;
-      case 'display':
-        sizing.standardSizing(null);
+        coordinate = sizing.fullSizing();
         break;
       case 'perfect':
-        sizing.standardSizing(index);
+        coordinate = sizing.displaySizing(index);
+        break;
+      default:
+        coordinate = sizing.displaySizing(null);
         break;
     }
 
-    //情報を返す
-    return sizing.getInformation();
+    //座標情報を返す
+    return coordinate;
   };
 
   //ブラウザの大きさを元に戻す
@@ -44,8 +51,7 @@ window.addEventListener('load', () => {
         sendResponse(information());
         break;
       case 'sizing':
-        styling(request.range, request.index);
-        sendResponse({});
+        sendResponse(styling(request.range, request.index));
         break;
       case 'back':
         back();

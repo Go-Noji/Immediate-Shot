@@ -1,19 +1,24 @@
-import {Queries} from "./Queries";
-import {Filename} from "./Filename";
+import {Queries} from "./class/Queries";
+import {Filename} from "./class/Filename";
 
 document.addEventListener('DOMContentLoaded', () => {
-  //クエリ文字列パース用クラス
-  const queries = new Queries();
+  chrome.runtime.sendMessage({type: 'open'}, (response) => {
+    //空文字が返ってきたら何もしない
+    if (response.src === '') {
+      window.close();
+      return;
+    }
 
-  //現在のクエリ情報を取得
-  const query = queries.getHistory();
+    //クエリ文字列パース用クラス
+    const queries = new Queries();
 
-  //ウィンドウを閉じるための処理
-  window.opener = window;
+    //現在のクエリ情報を取得
+    const query = queries.getHistory();
 
-  //src キーに値が存在すればそれをダウンロード
-  if (query.queries.src) {
-    //現在の設定を取得
+    //ウィンドウを閉じるための処理
+    window.opener = window;
+
+    //src キーに値が存在すればそれをダウンロード
     chrome.storage.sync.get({
       range: 'full',
       title: '{{title}}',
@@ -34,26 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
         items.counter = items.counter + 1;
       }
 
-      //ダウンロードのための a タグを作成
-      const link = document.createElement('a');
-
-      //a タグに download 属性をセット
-      link.setAttribute('download', filename.getFileName(items.title)+'.png');
-
-      //リンク先に src の値を仕込む
-      link.setAttribute('href', typeof query.queries.src === 'string' ? query.queries.src : '');
-
-      //クリックイベントを発火
-      link.dispatchEvent(new MouseEvent('click'));
-
-      //counter のインクリメント
-      chrome.storage.sync.set({counter: items.counter}, () => {
+      //ダウンロード
+      chrome.downloads.download({
+        url: response.src,
+        filename: filename.getFileName(items.title)+'.png'
+      }, () => {
         window.close();
       });
     });
-  }
-  else {
-    //ウィンドウを閉じる
-    window.close();
-  }
+  });
 });

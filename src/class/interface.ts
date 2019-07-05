@@ -16,7 +16,7 @@ export interface Histories {
   [key: number]: History
 }
 
-//Sizing.getInformation() の返り値
+//Sizing 関連
 export interface Information {
   windowWidth: number,
   windowHeight: number,
@@ -27,6 +27,10 @@ export interface Information {
   captureNumber: number,
   ratio: number,
   ratioType: string
+}
+export interface Coordinates {
+  x: number,
+  y: number
 }
 
 //Chrome に保管する設定値

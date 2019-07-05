@@ -2,7 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "target": "es2015",
-    "module": "es2015",
+    "module": "esnext",
     "strict": true
   }
 }

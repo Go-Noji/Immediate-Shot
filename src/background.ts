@@ -1,4 +1,5 @@
-import {Information, Settings, Range} from "./interface";
+import {Information, Settings, Range} from "src/class/interface";
+import {Capturing} from "./class/Capuring";
 
 interface InitData {
 	tab: chrome.tabs.Tab,
@@ -6,35 +7,34 @@ interface InitData {
 	information: Information
 }
 
-interface Capture {
-	x: number,
-	y: number,
-	url: string
-}
-
 {
-	//キャプチャされた画像配列
-	let captures: Capture[] = [];
+	//Capturing クラス
+	const capturing = new Capturing();
+
+	//ダウンロードページと対応する画像ファイル
+	const images: {[key: number]: string} =  {};
 
 	/**
-	 * range を Range 型にキャストする
-	 * @param range
+	 * 拡張機能の設定と現在参照中のタブ情報を返す
 	 */
-	const castRange = (range: string): Range => {
-		switch (range) {
-			case 'full':
-			case 'display':
-			case 'perfect':
-				return range;
-				break;
-			default:
-				return 'full';
-				break;
-		}
-	};
-
-	//拡張機能の設定と現在参照中のタブ情報を返す
 	const init = () => {
+		/**
+		 * range を Range 型にキャストする
+		 * @param range
+		 */
+		const castRange = (range: string): Range => {
+			switch (range) {
+				case 'full':
+				case 'display':
+				case 'perfect':
+					return range;
+					break;
+				default:
+					return 'full';
+					break;
+			}
+		};
+
 		return new Promise<InitData>(resolve => {
 			//拡張機能の設定を入手
 			new Promise<chrome.tabs.Tab>(innerResolve => {
@@ -58,147 +58,77 @@ interface Capture {
 		});
 	};
 
-	//キャプチャに必要な値を割り出して返す
-	const captureCalculation = (settings: Settings, information: Information) => {
-		//キャプチャに必要な画像数
-		const captureNumber = settings.range === 'perfect'
-			? information.captureNumber
-			: 1;
-
-		//キャプチャ画像は横に何枚並べればいいか
-		const widthCaptureNumber = settings.range === 'perfect'
-			? information.widthCaptureNumber
-			: 1;
-
-		//合成後の画像の右端何 px を断ち落とすか
-		let removeWidth = 0;
-		switch (settings.range) {
-			case 'perfect':
-				removeWidth = information.documentWidth <= information.windowWidth
-					? 0
-					: Math.ceil(information.documentWidth % information.windowWidth);
-				break;
-			case 'full':
-				removeWidth = Math.ceil(information.windowWidth * information.ratio);
-				break;
-		}
-
-		//合成後の画像の下端何 px を断ち落とすか
-		let removeHeight = 0;
-		switch (settings.range) {
-			case 'perfect':
-				removeHeight = information.documentHeight <= information.windowHeight
-					? 0
-					: Math.ceil(information.documentHeight % information.windowHeight);
-				break;
-			case 'full':
-				removeHeight = Math.ceil(information.windowHeight * information.ratio);
-				break;
-		}
-
-		//返す
-		return {captureNumber, widthCaptureNumber, removeWidth, removeHeight};
-	}
-
-	//サイズの変更・キャプチャ
-	const pushCapture = (type: Range, index: number, tab: chrome.tabs.Tab, x: number, y: number): Promise<void> => {
-		return new Promise(resolve => {
-			setTimeout(() => {
-				chrome.tabs.sendMessage(Number(tab.id), {type: 'sizing', range: type, index: index}, () => {
-					chrome.tabs.captureVisibleTab((url) => {
-						captures.push({x, y, url});
-						resolve();
-					});
-				});
-			}, 1000);
+	/**
+	 * 現在表示しているタブのキャプチャを一回行う
+	 * @param id
+	 * @param range
+	 */
+	const createCapture = (id: number, range: Range, index: number): Promise<void> => {
+		return  new Promise(resolve => {
+			chrome.tabs.sendMessage(id, {type: 'sizing', range: range, index: index}, response => {
+				setTimeout(() => {
+					capturing.capture(response.x, response.y)
+						.then(() => {
+							resolve();
+						});
+				}, index === 0 ? 100 : 20);
+			});
 		});
 	};
 
-	//キャプチャを行う
-	const getCaptures = async (settings: Settings, information: Information, tab: chrome.tabs.Tab) => {
+	/**
+	 * settings と information から求められている画像サイズを導き出す
+	 * @param settings
+	 * @param information
+	 */
+	const getImageSize = (settings: Settings, information: Information): {width: number, height: number} => {
+		//最終的な画像サイズを決定(この時点では range = display 用)
+		let width = information.windowWidth;
+		let height = information.windowHeight;
+
+		//range に合わせた画像サイズを用意
+		switch (settings.range) {
+			case 'full':
+				width = information.ratioType === 'width'
+					? information.windowWidth
+					: information.windowWidth * information.ratio;
+				height = information.ratioType === 'height'
+					? information.windowHeight
+					: information.windowHeight * information.ratio;
+				break;
+			case 'perfect':
+				width = information.documentWidth;
+				height = information.documentHeight;
+				break;
+		}
+		console.log([width, height]);
+
+		//返す
+		return  {width, height};
+	};
+
+	/**
+	 * 現在開いているタブのキャプチャを行う
+	 * @param settings
+	 * @param information
+	 * @param tab
+	 */
+	const getDataURL = async (settings: Settings, information: Information, tab: chrome.tabs.Tab) => {
 		//何枚の画像をキャプチャするか
 		const captureNumber = settings.range === 'perfect'
 			? information.captureNumber
 			: 1;
 
-		//キャプチャ画像は横に何枚並べればいいか
-		const widthCaptureNumber = settings.range === 'perfect'
-			? information.widthCaptureNumber
-			: 1;
+		//サイズ取得
+		const size = getImageSize(settings, information);
 
-		for (let i = 0; i < captureNumber; i = (i + 1) | 0) {
-			await pushCapture(settings.range, i, tab, i % widthCaptureNumber * information.windowWidth, Math.floor(i / widthCaptureNumber) * information.windowHeight);
-		}
-	};
-
-	//カンバスに画像を読み込み、描写する
-	const drawCanvas = (ctx: CanvasRenderingContext2D, index: number) => {
-		return new Promise<void>(resolve => {
-			const image = new Image();
-			image.onload = () => {
-				ctx.drawImage(image, captures[index].x, captures[index].y);
-				resolve();
-			};
-			image.src = captures[index].url;
-		});
-	};
-
-	/**
-	 * target が CanvasRenderingContext2D であるか判定する
-	 * 具体的には drawImage メソッドが存在するか判定する
-	 * @param target
-	 */
-	const isCanvasRenderingContext2D = (target: any): target is CanvasRenderingContext2D => {
-		return target.drawImage !== undefined;
-	}
-
-	//カンバスを作成し、画像 URI を作成する
-	const createDataURI = (settings:Settings, information: Information) => {
-		//この関数が行う非同期処理
-		let task: Promise<void>[] = [];
-
-		//カンバスの作成
-		const canvas = document.createElement('canvas');
-		switch (settings.range) {
-			case 'full':
-				canvas.setAttribute('width', information.ratioType === 'width' ? String(information.documentWidth * information.ratio) : String(information.documentWidth));
-				canvas.setAttribute('height', information.ratioType === 'height' ? String(information.documentHeight * information.ratio) : String(information.documentHeight));
-				break;
-			case 'display':
-				canvas.setAttribute('width', String(information.windowWidth));
-				canvas.setAttribute('height', String(information.windowHeight));
-				break;
-			case 'perfect':
-				canvas.setAttribute('width', String(information.documentWidth));
-				canvas.setAttribute('height', String(information.documentHeight));
-				break;
-		}
-		document.body.appendChild(canvas);
-
-		//カンバスのコンテキストを取得
-		const ctx = canvas.getContext('2d');
-
-		//画像配置処理登録
-		if (isCanvasRenderingContext2D(ctx))
-		{
-			for (let i = 0, max = captures.length; i < max; i = (i + 1) | 0) {
-				task.push(drawCanvas(ctx, i));
-			}
+		//キャプチャ処理を必要な回数だけ行う
+		for (let i = 0, max = captureNumber; i < max; i = (i + 1) | 0) {
+			await createCapture(Number(tab.id), settings.range, i);
 		}
 
-		//全て書き終えたら DataURL を生成して Promise を返す
-		return new Promise(resolve => {
-			Promise.all(task).then(() => {
-				//画像書き出し
-				const url = canvas.toDataURL();
-
-				//canvas を消す
-				canvas.remove();
-
-				//返す
-				resolve(url);
-			});
-		});
+		//dataURL 化
+		return capturing.compose(size.width, size.height);
 	};
 
 	//キャプチャ実行
@@ -206,13 +136,12 @@ interface Capture {
 		//現在表示しているタブの情報を入手する
 		init()
 			.then(data => {
-				//キャプチャ・画像生成
-				getCaptures(data.settings, data.information, data.tab)
-					.then(() => {
-						return createDataURI(data.settings, data.information);
-					})
-					.then(url => {
-						chrome.tabs.create({url: 'download.html?src='+url+'&title='+data.tab.title+'&url='+data.tab.url});
+				getDataURL(data.settings, data.information, data.tab)
+					.then((url: string) => {
+						chrome.tabs.create({url: 'download.html?title='+data.tab.title+'&url='+data.tab.url}, (tab: chrome.tabs.Tab) => {
+							//イメージをセット
+							images[Number(tab.id)] = url;
+						});
 						chrome.tabs.sendMessage(Number(data.tab.id), {type: 'back'});
 					});
 			})
@@ -224,4 +153,19 @@ interface Capture {
 
 	//アイコンクリック
 	chrome.browserAction.onClicked.addListener(action);
+
+	//メッセージ受信
+	chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+		switch (request.type) {
+			case 'open':
+				if (sender.tab !== undefined && images[Number(sender.tab.id)] !== undefined) {
+					sendResponse({src: images[Number(sender.tab.id)]});
+					delete images[Number(sender.tab.id)];
+				}
+				else {
+					sendResponse({src: ''});
+				}
+				break;
+		}
+	});
 }

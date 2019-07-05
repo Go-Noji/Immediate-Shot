@@ -1,4 +1,4 @@
-import {Information} from "./interface";
+import {Coordinates, Information} from "src/class/interface";
 
 export class Sizing {
 
@@ -75,6 +75,18 @@ export class Sizing {
   }
 
   /**
+   * 指定された index からスクロールすべき座標を返す
+   * @param index
+   * @private
+   */
+  private _getScrollCoordinates(index: number): Coordinates {
+    return {
+      x: Math.floor(index % this.widthCaptureNumber) % this.captureNumber * this.windowWidth,
+      y: Math.floor(index / this.widthCaptureNumber) % this.captureNumber * this.windowHeight
+    };
+  }
+
+  /**
    * 各サイズ情報を取得・計算・保持する
    * 加えて必用な定数も保管する
    */
@@ -134,37 +146,78 @@ export class Sizing {
   /**
    * フルサイズ用のサイジング処理を行う
    */
-  public fullSizing() {
+  public fullSizing(): Coordinates {
     //style タグを生成
     this._appendStyle('body{overflow:hidden;transform-origin: left top;transform: scale('+this.ratio+')}');
 
     //スクロール位置を 0 にする
     window.scrollTo(0, 0);
+
+    //0, 0 を返す
+    return {
+      x: 0,
+      y: 0
+    };
   }
 
   /**
    * スクロールバーを消すだけのサイジング処理を行う
+   * スクロール位置は index 番号で指定する
+   * この index 番号は getInformation() で取得できる captureNumber の範囲で指定し、
+   * 例えば
+   * widthCaptureNumber = 4
+   * heightCaptureNumber = 3
+   * captureNumber = 12
+   * だった場合は
+   * +----+----+----+----+
+   * |  0  |  1  |  2  |  3  |
+   * +----+----+----+----+
+   * |  4  |  5  |  6  |  7  |
+   * +----+----+----+----+
+   * |  8  |  9  | 10 | 11 |
+   * +----+----+----+----+
+   * といった各マスの左上座標へスクロールすることになる
+   * 各マスの width, height = windowWidth, windowHeight
+   * 大枠の width, height = documentWidth, documentHeight
    */
-  public standardSizing(scrollIndex: number|null = null) {
+  public displaySizing(index: number|null = null): Coordinates {
     //style タグを生成
     this._appendStyle('body,html{overflow:hidden}');
 
-    //スクロール指定があればその位置までスクロール
-    if (scrollIndex !== null) {
-      window.scrollTo(Math.floor(scrollIndex % this.widthCaptureNumber) % this.captureNumber * this.windowWidth, Math.floor(scrollIndex / this.widthCaptureNumber) % this.captureNumber * this.windowHeight);
+    //移動先座標の定義
+    let coordinates: Coordinates = {
+      x: 0,
+      y: 0
+    };
+
+    //スクロール指定があればその座標で coordinates を上書き
+    if (index !== null) {
+      coordinates = this._getScrollCoordinates(index);
     }
+
+    //スクロールの実行
+    window.scrollTo(coordinates.x, coordinates.y);
+
+    //スクロール情報を返す
+    return coordinates;
   }
 
   /**
    * サイジングのリセット
    * スクロール位置もリセットする
    */
-  public resetSizing() {
+  public resetSizing(): Coordinates {
     //style のリセット
     this._removeStyle();
 
     //スクロール位置のリセット
     window.scrollTo(this.scrollX, this.scrollY);
+
+    //スクロール位置を返す
+    return {
+      x: this.scrollX,
+      y: this.scrollY
+    };
   }
 
 }

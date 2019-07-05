@@ -144,6 +144,6 @@
   document.addEventListener('DOMContentLoaded', restore_options);
   const save = document.getElementById('save');
   if (save !== null) {
-    addEventListener('click', save_options);
+    save.addEventListener('click', save_options);
   }
 }
