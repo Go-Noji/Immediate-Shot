@@ -180,4 +180,14 @@ interface InitData {
 
 	//アイコンクリック
 	chrome.browserAction.onClicked.addListener(action);
+
+
+	//右クリックメニュー
+	chrome.contextMenus.create({
+		id: 'run',
+		title: 'Immediate Shot',
+		contexts: ['all'],
+		type: 'normal'
+	});
+	chrome.contextMenus.onClicked.addListener(action);
 }
