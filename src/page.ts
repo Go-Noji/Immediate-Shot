@@ -1,9 +1,8 @@
 import {Range, Coordinates} from "./class/interface";
 import {Sizing} from "./class/Sizing";
+import tabId = chrome.devtools.inspectedWindow.tabId;
 
 window.addEventListener('load', () => {
-
-  console.log('Immediate Shot Start');
 
   //サイズを取得するためのクラス
   const sizing = new Sizing();

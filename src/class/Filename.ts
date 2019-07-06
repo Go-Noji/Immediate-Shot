@@ -18,7 +18,7 @@ export class Filename {
    * @private
    */
   private _replaceBadCharacter(string: string, replacement: string = '_') {
-    return String(string).replace(/\\\/:\*\?"<>\|/g, String(replacement));
+    return String(string).replace(/[\\\/:\*\?"<>\-\|\s]+/g, replacement);
   }
 
   /**

@@ -96,8 +96,8 @@ export class Sizing {
     this.windowHeight = window.innerHeight;
 
     //ドキュメントサイズ
-    this.documentWidth = document.body.getBoundingClientRect().width;
-    this.documentHeight = document.body.getBoundingClientRect().height;
+    this.documentWidth = Math.max(...[document.body.clientWidth, document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    this.documentHeight = Math.max(...[document.body.clientHeight, document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
 
     //幅と高さそれぞれの割合
     const widthRatio = this.windowWidth / this.documentWidth;
@@ -182,7 +182,7 @@ export class Sizing {
    */
   public displaySizing(index: number|null = null): Coordinates {
     //style タグを生成
-    this._appendStyle('body,html{overflow:hidden}');
+    this._appendStyle('html{overflow:hidden}');
 
     //移動先座標の定義
     let coordinates: Coordinates = {
@@ -196,7 +196,7 @@ export class Sizing {
     }
 
     //スクロールの実行
-    window.scrollTo(coordinates.x, coordinates.y);
+    document.getElementsByTagName('html')[0].scrollTo(coordinates.x, coordinates.y);
 
     //スクロール情報を返す
     return coordinates;

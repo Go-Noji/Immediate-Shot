@@ -1,6 +1,6 @@
 {
 	"name": "Immediate Shot",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Immediate Shot is a Chrome Extension that takes screenshots quickly with one click.",
 	"background": {
 		"persistent": false,

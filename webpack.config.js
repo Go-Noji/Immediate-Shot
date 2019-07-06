@@ -4,7 +4,6 @@ module.exports = {
 	mode: MODE,
 	entry: {
 		background: "./src/background.ts",
-		inner: "./src/inner.ts",
 		options: "./src/options.ts",
 		page: "./src/page.ts",
 	},

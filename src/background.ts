@@ -1,5 +1,6 @@
 import {Information, Settings, Range} from "src/class/interface";
-import {Capturing} from "./class/Capuring";
+import {Capturing} from "./class/Capturing";
+import {Filename} from "./class/Filename";
 
 interface InitData {
 	tab: chrome.tabs.Tab,
@@ -10,9 +11,6 @@ interface InitData {
 {
 	//Capturing クラス
 	const capturing = new Capturing();
-
-	//ダウンロードページと対応する画像ファイル
-	const images: {[key: number]: string} =  {};
 
 	/**
 	 * 拡張機能の設定と現在参照中のタブ情報を返す
@@ -71,7 +69,7 @@ interface InitData {
 						.then(() => {
 							resolve();
 						});
-				}, index === 0 ? 100 : 20);
+				}, index === 0 ? 200 : 10);
 			});
 		});
 	};
@@ -101,7 +99,6 @@ interface InitData {
 				height = information.documentHeight;
 				break;
 		}
-		console.log([width, height]);
 
 		//返す
 		return  {width, height};
@@ -127,22 +124,52 @@ interface InitData {
 			await createCapture(Number(tab.id), settings.range, i);
 		}
 
+		//スタイルを元に戻す
+		chrome.tabs.sendMessage(Number(tab.id), {type: 'back'});
+
 		//dataURL 化
 		return capturing.compose(size.width, size.height);
 	};
 
+	/**
+	 * ファイル名を決定し、ダウンロードを行う
+	 * @param url
+	 * @param settings
+	 */
+	const download = (url: string, settings: Settings, tab: chrome.tabs.Tab) => {
+		//ファイル名変換用クラス
+		const filename = new Filename();
+
+		//ファイル名テンプレート変数文字列登録
+		if (settings.title.indexOf('{{title}}') !== -1) {
+			filename.setTemplate('{{title}}', decodeURIComponent(String(tab.title)));
+		}
+		if (settings.title.indexOf('{{url}}') !== -1) {
+			filename.setTemplate('{{url}}', String(tab.url).replace(/https?:\/\//, ''));
+		}
+		if (settings.title.indexOf('{{counter}}') !== -1) {
+			filename.setTemplate('{{counter}}', String(settings.counter));
+			settings.counter = settings.counter + 1;
+		}
+
+		//counter 設定の保存
+		chrome.storage.sync.set({counter: settings.counter});
+
+		//ダウンロード
+		chrome.downloads.download({url: url, filename: filename.getFileName(settings.title)+'.png'});
+	};
+
 	//キャプチャ実行
 	const action = () => {
+		//キャプチャの初期化
+		capturing.init();
+
 		//現在表示しているタブの情報を入手する
 		init()
 			.then(data => {
 				getDataURL(data.settings, data.information, data.tab)
 					.then((url: string) => {
-						chrome.tabs.create({url: 'download.html?title='+data.tab.title+'&url='+data.tab.url}, (tab: chrome.tabs.Tab) => {
-							//イメージをセット
-							images[Number(tab.id)] = url;
-						});
-						chrome.tabs.sendMessage(Number(data.tab.id), {type: 'back'});
+						download(url, data.settings, data.tab);
 					});
 			})
 			.catch((data) => {
@@ -153,19 +180,4 @@ interface InitData {
 
 	//アイコンクリック
 	chrome.browserAction.onClicked.addListener(action);
-
-	//メッセージ受信
-	chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-		switch (request.type) {
-			case 'open':
-				if (sender.tab !== undefined && images[Number(sender.tab.id)] !== undefined) {
-					sendResponse({src: images[Number(sender.tab.id)]});
-					delete images[Number(sender.tab.id)];
-				}
-				else {
-					sendResponse({src: ''});
-				}
-				break;
-		}
-	});
 }
