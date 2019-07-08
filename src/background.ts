@@ -69,7 +69,7 @@ interface InitData {
 						.then(() => {
 							resolve();
 						});
-				}, index === 0 ? 200 : 10);
+				}, index === 0 ? 200 : 30);
 			});
 		});
 	};
