@@ -63,13 +63,19 @@ interface InitData {
 	 */
 	const createCapture = (id: number, range: Range, index: number): Promise<void> => {
 		return  new Promise(resolve => {
+			//index === 1 (キャプチャが二回目)の場合は position: fixed の要素を非表示にする
+			if (index === 1) {
+				chrome.tabs.sendMessage(id, {type: 'killFixed'});
+			}
+
+			//スクロール・キャプチャ
 			chrome.tabs.sendMessage(id, {type: 'sizing', range: range, index: index}, response => {
 				setTimeout(() => {
 					capturing.capture(response.x, response.y)
 						.then(() => {
 							resolve();
 						});
-				}, index === 0 ? 200 : 30);
+				}, index < 2 ? 200 : 30);
 			});
 		});
 	};

@@ -9,6 +9,19 @@ window.addEventListener('load', () => {
   //position: fixed を採用している要素
   let fixedElements: HTMLElement[] = [];
 
+  //position: fixed を採用している要素を確保する
+  const getFixed = () => {
+    const findStyle = new FindStyle(document.body);
+    fixedElements = findStyle.find('position', 'fixed');
+  }
+
+  //position: fixed を採用している要素を非表示にする or 元に戻す
+  const controlFixed = (property: 'hidden' | '') => {
+    for (let i = 0, max = fixedElements.length; i < max; i = (i + 1) | 0) {
+      fixedElements[i].style.visibility = property;
+    }
+  };
+
   //表示されているタブの情報を返す
   const information = () => {
     return sizing.getInformation();
@@ -44,20 +57,6 @@ window.addEventListener('load', () => {
     sizing.resetSizing();
   };
 
-  /*
-  const getFixed = () => {
-    const start = performance.now();
-    const findStyle = new FindStyle(document.body);
-    fixedElements = findStyle.find('position', 'fixed');
-    for (let i = 0, max = fixedElements.length; i < max; i = (i + 1) | 0) {
-      fixedElements[i].style.visibility = 'hidden';
-    }
-    const end = performance.now();
-    console.log('[killFixed]: ' + String((end - start) / 1000)+'sec');
-  }
-  getFixed();
-  */
-
   //メッセージパッシング
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // 受け取った値で分岐
@@ -68,7 +67,12 @@ window.addEventListener('load', () => {
       case 'sizing':
         sendResponse(styling(request.range, request.index));
         break;
+      case 'killFixed':
+        controlFixed('hidden');
+        sendResponse({});
+        break;
       case 'back':
+        controlFixed('');
         back();
         sendResponse({});
         break;
@@ -77,5 +81,8 @@ window.addEventListener('load', () => {
         break;
     }
   });
+
+  //position: fixed を採用している要素の確保
+  getFixed();
 
 });
