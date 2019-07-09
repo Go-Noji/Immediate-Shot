@@ -26,29 +26,29 @@
 <body>
 <ul>
   <li>
-    <spna>Capture range: </spna>
-    <label>Full<input id="full" name="range" type="radio" value="full"></label>
-    <label>Display<input id="display" name="range" type="radio" value="display"></label>
-    <label>Perfect<input id="perfect" name="range" type="radio" value="perfect"></label>
+    <spna><span class="lang" data-key="option_title_captureRange"></span>: </spna>
+    <label><input id="full" name="range" type="radio" value="full"><span class="lang" data-key="option_description_full"></span>&nbsp;</label>
+    <label><input id="display" name="range" type="radio" value="display"><span class="lang" data-key="option_description_display"></span>&nbsp;</label>
+    <label><input id="perfect" name="range" type="radio" value="perfect"><span class="lang" data-key="option_description_perfect"></span></label>
   </li>
   <li>
     <label>
-      <span>File name: </span>
+      <span><span class="lang" data-key="option_title_fileName"></span>: </span>
       <input id="title" name="title" type="text" value="" placeholder="capture">.png
     </label>
-    <p>templates</p>
-    <p>{{title}}: Replaced with title tag of target page.</p>
-    <p>{{url}}: Replaced with URL of target page.</p>
-    <p>{{counter}}: Replaced by 'counter' below. It will be incremented each time it is called.</p>
+    <p><span class="lang" data-key="option_title_templates"></span></p>
+    <p><strong>{{title}}</strong>: <span class="lang" data-key="option_description_title"></span></p>
+    <p><strong>{{url}}</strong>: <span class="lang" data-key="option_description_url"></span></p>
+    <p><strong>{{counter}}</strong>: <span class="lang" data-key="option_description_counter"></span></p>
   </li>
   <li>
     <label>
-      <span>File name counter(use '{{counter}}' by File name.): </span>
+      <span><span class="lang" data-key="option_title_counter"></span>: </span>
       <input id="counter" type="number" name="counter" min="0" value="0">
     </label>
   </li>
 </ul>
-<button id="save">save</button><span id="status"></span>
+<button id="save"><span class="lang" data-key="option_save"></span></button><span id="status"></span>
 <script src="options.bundle.js"></script>
 </body>
 </html>

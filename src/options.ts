@@ -118,7 +118,7 @@
       if (status === null) {
         return;
       }
-      status.textContent = 'Options saved.';
+      status.textContent = chrome.i18n.getMessage('msg_saved');
       setTimeout(() => {
         status.textContent = '';
       }, 750);
@@ -140,10 +140,40 @@
     });
   };
 
+  const setLang = () => {
+    //テキスト変換対象の取得
+    const targets = document.getElementsByClassName('lang');
+
+    //変換処理
+    for (let i = 0, max = targets.length; i < max; i = (i + 1) | 0) {
+      //対象を一旦変数へ挿入
+      const target = targets.item(i);
+
+      //対象が存在しなかったらなにもしない
+      if (target === null) {
+        continue;
+      }
+
+      //メッセージキーを一旦変数へ挿入
+      const key = target.getAttribute('data-key');
+
+      //メッセージキーが存在しなかったらなにもしない
+      if (key === null) {
+        continue;
+      }
+
+      //テキスト設定
+      target.innerHTML = chrome.i18n.getMessage('msg_'+key);
+    }
+  };
+
   //イベントの登録
   document.addEventListener('DOMContentLoaded', restore_options);
   const save = document.getElementById('save');
   if (save !== null) {
     save.addEventListener('click', save_options);
   }
+
+  //言語ごとにテキスト設定
+  document.addEventListener('DOMContentLoaded', setLang);
 }

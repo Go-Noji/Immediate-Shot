@@ -1,0 +1,15 @@
+{
+  "msg_desc": {"message": "Immediate Shot is a Chrome Extension that takes screenshots quickly with one click."},
+  "msg_saved": {"message": " Options saved."},
+  "msg_option_title_captureRange": {"message": "Capture range"},
+  "msg_option_description_full": {"message": "Full(high speed)"},
+  "msg_option_description_display": {"message": "Display(displayed range)"},
+  "msg_option_description_perfect": {"message": "Perfect(high resolution)"},
+  "msg_option_title_fileName": {"message": "File name"},
+  "msg_option_title_templates": {"message": "File name templates"},
+  "msg_option_description_title": {"message": "Replaced with title tag of target page."},
+  "msg_option_description_url": {"message": "Replaced with URL of target page."},
+  "msg_option_description_counter": {"message": "Replaced by 'counter' below. It will be incremented each time it is called."},
+  "msg_option_title_counter": {"message": "File name counter(use '{{counter}}' by File name.)"},
+  "msg_option_save": {"message": "save"}
+}

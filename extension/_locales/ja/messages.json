@@ -1,0 +1,15 @@
+{
+  "msg_desc": {"message": "Immediate Shot はワンクリックで素早くスクリーンショットを撮る Chrome 用拡張機能です。"},
+  "msg_saved": {"message": " 設定を保存しました。"},
+  "msg_option_title_captureRange": {"message": "範囲"},
+  "msg_option_description_full": {"message": "全て(高速)"},
+  "msg_option_description_display": {"message": "表示中"},
+  "msg_option_description_perfect": {"message": "全て(高品質)"},
+  "msg_option_title_fileName": {"message": "ファイル名"},
+  "msg_option_title_templates": {"message": "ファイル名変数"},
+  "msg_option_description_title": {"message": "ページタイトルに置き換わります"},
+  "msg_option_description_url": {"message": "URLに置き換わります"},
+  "msg_option_description_counter": {"message": "下記'count'に置き換わります(数値は一つずつ増えていきます)"},
+  "msg_option_title_counter": {"message": "カウンター(ファイル名にて{{counter}}として使用)"},
+  "msg_option_save": {"message": "保存"}
+}
