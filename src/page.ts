@@ -1,11 +1,13 @@
 import {Range, Coordinates} from "./class/interface";
 import {Sizing} from "./class/Sizing";
-import tabId = chrome.devtools.inspectedWindow.tabId;
-
+import {FindStyle} from "./class/FindStyle";
 window.addEventListener('load', () => {
 
   //サイズを取得するためのクラス
   const sizing = new Sizing();
+
+  //position: fixed を採用している要素
+  let fixedElements: HTMLElement[] = [];
 
   //表示されているタブの情報を返す
   const information = () => {
@@ -41,6 +43,20 @@ window.addEventListener('load', () => {
   const back = () => {
     sizing.resetSizing();
   };
+
+  /*
+  const getFixed = () => {
+    const start = performance.now();
+    const findStyle = new FindStyle(document.body);
+    fixedElements = findStyle.find('position', 'fixed');
+    for (let i = 0, max = fixedElements.length; i < max; i = (i + 1) | 0) {
+      fixedElements[i].style.visibility = 'hidden';
+    }
+    const end = performance.now();
+    console.log('[killFixed]: ' + String((end - start) / 1000)+'sec');
+  }
+  getFixed();
+  */
 
   //メッセージパッシング
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
