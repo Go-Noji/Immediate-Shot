@@ -26,7 +26,9 @@ export interface Information {
   heightCaptureNumber: number,
   captureNumber: number,
   ratio: number,
-  ratioType: string
+  ratioType: string,
+  scrollX: number,
+  scrollY: number
 }
 export interface Coordinates {
   x: number,

@@ -139,7 +139,9 @@ export class Sizing {
       heightCaptureNumber: this.heightCaptureNumber,
       captureNumber: this.captureNumber,
       ratio: this.ratio,
-      ratioType: this.ratioType
+      ratioType: this.ratioType,
+      scrollX: this.scrollX,
+      scrollY: this.scrollY
     }
   }
 
@@ -163,6 +165,7 @@ export class Sizing {
   /**
    * スクロールバーを消すだけのサイジング処理を行う
    * スクロール位置は index 番号で指定する
+   * index が null だった場合はスクロールを変更しない
    * この index 番号は getInformation() で取得できる captureNumber の範囲で指定し、
    * 例えば
    * widthCaptureNumber = 4
@@ -183,6 +186,14 @@ export class Sizing {
   public displaySizing(index: number|null = null): Coordinates {
     //style タグを生成
     this._appendStyle('html{overflow:hidden}');
+
+    //index 指定が無かったら現在のスクロール位置を返す
+    if (index === null) {
+      return {
+        x: document.getElementsByTagName('html')[0].scrollTop,
+        y: document.getElementsByTagName('html')[0].scrollLeft
+      };
+    }
 
     //移動先座標の定義
     let coordinates: Coordinates = {
@@ -206,18 +217,21 @@ export class Sizing {
    * サイジングのリセット
    * スクロール位置もリセットする
    */
-  public resetSizing(): Coordinates {
+  public resetSizing(coordinates: Coordinates): Coordinates {
     //style のリセット
     this._removeStyle();
 
-    //スクロール位置のリセット
-    window.scrollTo(this.scrollX, this.scrollY);
-
-    //スクロール位置を返す
-    return {
-      x: this.scrollX,
-      y: this.scrollY
+    //現在のスクロール位置を取得
+    const beforeCoordinates: Coordinates = {
+      x: document.getElementsByTagName('html')[0].scrollTop,
+      y: document.getElementsByTagName('html')[0].scrollLeft
     };
+
+    //スクロール位置を coordinates へリセット
+    document.getElementsByTagName('html')[0].scrollTo(coordinates.x, coordinates.y);
+
+    //修正前のスクロール位置を返す
+    return beforeCoordinates;
   }
 
 }

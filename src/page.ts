@@ -53,8 +53,8 @@ window.addEventListener('load', () => {
   };
 
   //ブラウザの大きさを元に戻す
-  const back = () => {
-    sizing.resetSizing();
+  const resetSizing = (coordinates: Coordinates) => {
+    sizing.resetSizing(coordinates);
   };
 
   //メッセージパッシング
@@ -71,9 +71,9 @@ window.addEventListener('load', () => {
         controlFixed('hidden');
         sendResponse({});
         break;
-      case 'back':
+      case 'resetSizing':
         controlFixed('');
-        back();
+        resetSizing({x: request.x, y: request.y});
         sendResponse({});
         break;
       default:

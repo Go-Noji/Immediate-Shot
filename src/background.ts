@@ -131,7 +131,7 @@ interface InitData {
 		}
 
 		//スタイルを元に戻す
-		chrome.tabs.sendMessage(Number(tab.id), {type: 'back'});
+		chrome.tabs.sendMessage(Number(tab.id), {type: 'resetSizing', x: information.scrollX, y: information.scrollY});
 
 		//dataURL 化
 		return capturing.compose(size.width, size.height);
@@ -186,7 +186,6 @@ interface InitData {
 
 	//アイコンクリック
 	chrome.browserAction.onClicked.addListener(action);
-
 
 	//右クリックメニュー
 	chrome.contextMenus.create({
