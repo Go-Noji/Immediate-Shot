@@ -140,6 +140,9 @@
     });
   };
 
+  /**
+   * lang クラスを持った要素の 'msg_' + data-key属性 から言語メッセージを取得し、要素のテキストを変更する
+   */
   const setLang = () => {
     //テキスト変換対象の取得
     const targets = document.getElementsByClassName('lang');
