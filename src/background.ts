@@ -77,7 +77,7 @@ interface InitData {
 						.then(() => {
 							resolve();
 						});
-				}, index < 2 ? CAPTURE_WAIT_MILLISECONDS : FIRST_CAPTURE_WAIT_MILLISECONDS);
+				}, index < 2 ? FIRST_CAPTURE_WAIT_MILLISECONDS : CAPTURE_WAIT_MILLISECONDS);
 			});
 		});
 	};
