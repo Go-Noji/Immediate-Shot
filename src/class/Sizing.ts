@@ -197,15 +197,15 @@ export class Sizing {
    * 大枠の width, height = documentWidth, documentHeight
    */
   public displaySizing(index: number|null = null): Coordinates {
-    //index 指定が無かったら style タグを適用の後、現在のスクロール位置を返す
+    //index 指定が無かったら style タグを適用の後、(0, 0)を返す
     if (index === null) {
       //style タグを生成
-      this._appendStyle('html{overflow:hidden}');
+      this._appendStyle('body{overflow:hidden}');
 
-      //現在のスクロール位置を返す
+      //(0, 0)返す
       return {
-        x: document.getElementsByTagName('html')[0].scrollTop,
-        y: document.getElementsByTagName('html')[0].scrollLeft
+        x: 0,
+        y: 0
       };
     }
 
