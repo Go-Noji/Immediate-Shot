@@ -3,37 +3,37 @@ import {Coordinates, Information} from "src/class/interface";
 export class Sizing {
 
   //constructor() 時点の window width
-  readonly windowWidth: number;
+  private windowWidth: number = 0;
 
   //constructor() 時点の window height
-  readonly windowHeight: number;
+  private windowHeight: number = 0;
 
   //constructor() 時点の document width
-  readonly documentWidth: number;
+  private documentWidth: number = 0;
 
   //constructor() 時点の document height
-  readonly documentHeight: number;
+  private documentHeight: number = 0;
 
   //画面縮小比率
-  readonly ratio: number;
+  private ratio: number = 0;
 
   //画面を幅と高さのどちらで縮小したか
-  readonly ratioType: 'width' | 'height';
+  private ratioType: 'width' | 'height' = 'height';
 
   //documentWidth を現在の windowWidth の大きさでキャプチャするには横に何枚キャプチャが必要か
-  readonly widthCaptureNumber: number;
+  private widthCaptureNumber: number = 0;
 
   //documentHeight を現在の windowHeight の大きさでキャプチャするには縦に何枚キャプチャが必要か
-  readonly heightCaptureNumber: number;
+  private heightCaptureNumber: number = 0;
 
   //上記二つの乗算値
-  readonly captureNumber: number;
+  private captureNumber: number = 0;
 
   //constructor() 時点のスクロール位置(横)
-  readonly scrollX: number;
+  private scrollX: number = 0;
 
   //constructor() 時点のスクロール位置(縦)
-  readonly scrollY: number;
+  private scrollY: number = 0;
 
   //このクラスが扱う <style> タグの id 属性値
   readonly STYLE_ID: string;
@@ -87,10 +87,10 @@ export class Sizing {
   }
 
   /**
-   * 各サイズ情報を取得・計算・保持する
-   * 加えて必用な定数も保管する
+   * 各種情報をアップデートする
+   * @private
    */
-  public constructor() {
+  private _updateInformation() {
     //ウィンドウサイズ
     this.windowWidth = window.innerWidth;
     this.windowHeight = window.innerHeight;
@@ -120,9 +120,18 @@ export class Sizing {
     //現在のスクロール座標を記録
     this.scrollX = window.scrollX;
     this.scrollY = window.scrollY;
+  }
 
+  /**
+   * 各サイズ情報を取得・計算・保持する
+   * 加えて必用な定数も保管する
+   */
+  public constructor() {
     //style タグに使用する id
     this.STYLE_ID = 'sizing_'+Math.random().toString(36).slice(-8);
+
+    //各種情報をセットする
+    this._updateInformation();
   }
 
   /**
@@ -130,6 +139,10 @@ export class Sizing {
    * @return {{documentWidth: number | *, documentHeight: number | *, windowHeight: number | *, ratioType: string, windowWidth: number | *, ratio: (*|number)}}
    */
   public getInformation(): Information {
+    //情報の更新
+    this._updateInformation();
+
+    //計算結果を返す
     return {
       windowWidth: this.windowWidth,
       windowHeight: this.windowHeight,
@@ -184,30 +197,28 @@ export class Sizing {
    * 大枠の width, height = documentWidth, documentHeight
    */
   public displaySizing(index: number|null = null): Coordinates {
-    //style タグを生成
-    this._appendStyle('html{overflow:hidden}');
-
-    //index 指定が無かったら現在のスクロール位置を返す
+    //index 指定が無かったら style タグを適用の後、現在のスクロール位置を返す
     if (index === null) {
+      //style タグを生成
+      this._appendStyle('html{overflow:hidden}');
+
+      //現在のスクロール位置を返す
       return {
         x: document.getElementsByTagName('html')[0].scrollTop,
         y: document.getElementsByTagName('html')[0].scrollLeft
       };
     }
 
-    //移動先座標の定義
-    let coordinates: Coordinates = {
-      x: 0,
-      y: 0
-    };
-
-    //スクロール指定があればその座標で coordinates を上書き
-    if (index !== null) {
-      coordinates = this._getScrollCoordinates(index);
+    //もし index が 0 だったらスクロール位置を 0, 0 にする
+    if (index === 0) {
+      document.getElementsByTagName('html')[0].scrollTo(0, 0);
     }
 
-    //スクロールの実行
-    document.getElementsByTagName('html')[0].scrollTo(coordinates.x, coordinates.y);
+    //移動先座標の定義
+    const coordinates = this._getScrollCoordinates(index);
+
+    //overflow スタイルの適用 & transform: translate による疑似的なスクロールの実行
+    this._appendStyle('body{overflow:hidden;transform:translate('+(coordinates.x * -1)+'px,'+(coordinates.y * -1)+'px)}');
 
     //スクロール情報を返す
     return coordinates;
