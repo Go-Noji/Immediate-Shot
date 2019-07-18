@@ -1,3 +1,5 @@
+import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
+
 //設定項目
 //range: 'full' か 'display', 'perfect'.  デフォルト値は 'full'
 //title: ダウンロードするファイル名が, ここに仕込んだ文字列+'.png' になる テンプレート変数を入れることも可能 デフォルトは {{title}}
@@ -130,9 +132,9 @@
    */
   const restore_options = () => {
     chrome.storage.sync.get({
-      range: 'full',
-      title: '{{title}}',
-      counter: 0
+      range: DEFAULT_RANGE,
+      title: DEFAULT_TITLE,
+      counter: DEFAULT_COUNTER
     }, (items: {[key: string]: string}) => {
       setChecked(items.range);
       setValue('title', items.title);

@@ -1,6 +1,8 @@
 import {Information, Settings, Range} from "src/class/interface";
 import {Capturing} from "./class/Capturing";
 import {Filename} from "./class/Filename";
+import './config';
+import {CAPTURE_WAIT_MILLISECONDS, DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE, FIRST_CAPTURE_WAIT_MILLISECONDS} from "./config";
 
 interface InitData {
 	tab: chrome.tabs.Tab,
@@ -42,7 +44,7 @@ interface InitData {
 			})
 				.then(tab => {
 					return new Promise<{tab: chrome.tabs.Tab, settings: Settings}>(innerResolve => {
-						chrome.storage.sync.get({range: 'full', title: '{{title}}', counter: 0}, (items: {[key: string]: string}) => {
+						chrome.storage.sync.get({range: DEFAULT_RANGE, title: DEFAULT_TITLE, counter: DEFAULT_COUNTER}, (items: {[key: string]: string}) => {
 							innerResolve({tab, settings: {range: castRange(items.range), title: String(items.title), counter: Number(items.counter)}});
 						});
 					});
@@ -75,7 +77,7 @@ interface InitData {
 						.then(() => {
 							resolve();
 						});
-				}, index < 2 ? 100 : 20);
+				}, index < 2 ? CAPTURE_WAIT_MILLISECONDS : FIRST_CAPTURE_WAIT_MILLISECONDS);
 			});
 		});
 	};
