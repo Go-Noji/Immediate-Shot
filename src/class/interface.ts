@@ -40,5 +40,6 @@ export type Range = 'full' | 'display' | 'perfect';
 export interface Settings {
   range: Range,
   title: string,
-  counter: number
+  counter: number,
+  max: boolean
 }

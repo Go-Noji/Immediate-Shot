@@ -87,4 +87,32 @@ export class FindStyle {
     return result;
   }
 
+  /**
+   * 全要素中で最大の width, もしくは height を返す
+   * @param target
+   */
+  public highSize(target: 'width' | 'height' = 'height'): number{
+    //このメソッドが返す数値
+    let result: number = 0;
+
+    //捕捉済みの要素を逐一検索
+    for (let i = 0, max = this.elements.length; i < max; i = (i + 1) | 0) {
+      //サイズの計測対象(width or height)
+      const size = target === 'height'
+        ? this.elements[i].getBoundingClientRect().height
+        : this.elements[i].getBoundingClientRect().width;
+
+      //result 以下だったらスルー
+      if (result >= size) {
+        continue;
+      }
+
+      //最高値を書き換える
+      result = size;
+    }
+
+    //結果を返す
+    return result;
+  }
+
 }

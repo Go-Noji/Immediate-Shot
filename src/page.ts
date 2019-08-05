@@ -23,12 +23,12 @@ window.addEventListener('load', () => {
   };
 
   //表示されているタブの情報を返す
-  const information = () => {
-    return sizing.getInformation();
+  const information = (max: boolean) => {
+    return sizing.getInformation(max);
   };
 
   //ブラウザの大きさを適切なものに変える
-  const styling = (range: Range, index: number) => {
+  const styling = (range: Range, index: number, max: boolean) => {
     //処理終了後の座標情報
     let coordinate: Coordinates = {
       x: 0,
@@ -41,7 +41,7 @@ window.addEventListener('load', () => {
         coordinate = sizing.fullSizing();
         break;
       case 'perfect':
-        coordinate = sizing.displaySizing(index);
+        coordinate = sizing.displaySizing(index, max);
         break;
       default:
         coordinate = sizing.displaySizing(null);
@@ -62,10 +62,10 @@ window.addEventListener('load', () => {
     // 受け取った値で分岐
     switch (request.type) {
       case 'information':
-        sendResponse(information());
+        sendResponse(information(request.max));
         break;
       case 'sizing':
-        sendResponse(styling(request.range, request.index));
+        sendResponse(styling(request.range, request.index, request.max));
         break;
       case 'killFixed':
         controlFixed('hidden');

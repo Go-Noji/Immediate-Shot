@@ -1,9 +1,10 @@
-import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
+import {DEFAULT_COUNTER, DEFAULT_MAX, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
 
 //設定項目
 //range: 'full' か 'display', 'perfect'.  デフォルト値は 'full'
 //title: ダウンロードするファイル名が, ここに仕込んだ文字列+'.png' になる テンプレート変数を入れることも可能 デフォルトは {{title}}
 //counter: 上記 title に {{counter}} で仕込めるカウンターの数値
+//max: true に設定してあると画面の幅・高さを取得する時に全要素をチェックする
 //テンプレート変数
 //{{title}}: タイトルタグの内容
 //{{url}}: url の内容
@@ -23,6 +24,14 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
    */
   const isHTMLRadioInputElement = (target: any): target is HTMLInputElement  => {
     return target !== null && target.type === 'radio' && target.checked !== undefined;
+  };
+
+  /**
+   * target はチェックボックスか判定
+   * @param target
+   */
+  const isHTMLCheckboxInputElement = (target: any): target is HTMLInputElement  => {
+    return target !== null && target.type === 'checkbox' && target.checked !== undefined;
   };
 
   /**
@@ -65,7 +74,7 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
    * id 属性が id の要素がラジオボタンかつ、チェックされているか判定
    * @param id
    */
-  const isChecked = (id: string): boolean => {
+  const isCheckedRadio = (id: string): boolean => {
     //id で捕捉
     const target = document.getElementById(id);
 
@@ -82,7 +91,7 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
    * id 属性が id の要素がラジオボタンをチェック状態にする
    * @param id
    */
-  const setChecked = (id: string) => {
+  const setCheckedRadio = (id: string) => {
     //id で捕捉
     const target = document.getElementById(id);
 
@@ -96,15 +105,49 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
   };
 
   /**
+   * id 属性が id の要素がチェックボックスかつ、チェックされているか判定
+   * @param id
+   */
+  const isCheckedCheckbox = (id: string): boolean => {
+    //id で捕捉
+    const target = document.getElementById(id);
+
+    //DOM がラジオボタンでなかったら失敗
+    if ( ! isHTMLCheckboxInputElement(target)) {
+      return false;
+    }
+
+    //checked をそのまま返す
+    return target.checked;
+  };
+
+  /**
+   * id 属性が id のチェックボックス要素をチェック状態にする
+   * @param id
+   */
+  const setCheckedCheckbox = (id: string, checked: boolean = true) => {
+    //id で捕捉
+    const target = document.getElementById(id);
+
+    //DOM がラジオボタンでなかったらなにもしない
+    if ( ! isHTMLCheckboxInputElement(target)) {
+      return false;
+    }
+
+    //チェック
+    target.checked = checked;
+  };
+
+  /**
    * 保存
    */
   const save_options = () => {
     //設定の取得(range)
     let range = 'full';
-    if (isChecked('display')) {
+    if (isCheckedRadio('display')) {
       range = 'display';
     }
-    else if (isChecked('perfect')) {
+    else if (isCheckedRadio('perfect')) {
       range = 'perfect';
     }
 
@@ -114,8 +157,11 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
     //設定の取得(counter)
     const counter = Number(getValue('counter'));
 
+    //設定の取得(max)
+    const max = isCheckedCheckbox('max');
+
     //保存
-    chrome.storage.sync.set({range, title, counter}, () => {
+    chrome.storage.sync.set({range, title, counter, max}, () => {
       const status = document.getElementById('status');
       if (status === null) {
         return;
@@ -134,11 +180,13 @@ import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
     chrome.storage.sync.get({
       range: DEFAULT_RANGE,
       title: DEFAULT_TITLE,
-      counter: DEFAULT_COUNTER
+      counter: DEFAULT_COUNTER,
+      max: DEFAULT_MAX
     }, (items: {[key: string]: string}) => {
-      setChecked(items.range);
+      setCheckedRadio(items.range);
       setValue('title', items.title);
       setValue('counter', String(items.counter));
+      setCheckedCheckbox('max', Boolean(items.max));
     });
   };
 

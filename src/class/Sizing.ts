@@ -1,4 +1,5 @@
 import {Coordinates, Information} from "src/class/interface";
+import {FindStyle} from "./FindStyle";
 
 export class Sizing {
 
@@ -90,14 +91,27 @@ export class Sizing {
    * 各種情報をアップデートする
    * @private
    */
-  private _updateInformation() {
+  private _updateInformation(max: boolean) {
+    //全要素サイズ取得用インスタンス
+    let findStyle = new FindStyle(document.getElementsByTagName('html')[0]);
+
     //ウィンドウサイズ
     this.windowWidth = window.innerWidth;
     this.windowHeight = window.innerHeight;
 
+    //ドキュメントサイズの最大値を取得するリスト
+    let widthSources = [document.body.clientWidth, document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth];
+    let heightSources = [document.body.clientHeight, document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight];
+
+    //もし max === true だったら取得リストに全要素の最大値を加える
+    if (max) {
+      widthSources.push(findStyle.highSize('width'));
+      heightSources.push(findStyle.highSize('height'));
+    }
+
     //ドキュメントサイズ
-    this.documentWidth = Math.max(...[document.body.clientWidth, document.body.scrollWidth, document.documentElement.scrollWidth, document.documentElement.clientWidth]);
-    this.documentHeight = Math.max(...[document.body.clientHeight, document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]);
+    this.documentWidth = Math.max(...widthSources);
+    this.documentHeight = Math.max(...heightSources);
 
     //幅と高さそれぞれの割合
     const widthRatio = this.windowWidth / this.documentWidth;
@@ -126,21 +140,21 @@ export class Sizing {
    * 各サイズ情報を取得・計算・保持する
    * 加えて必用な定数も保管する
    */
-  public constructor() {
+  public constructor(max: boolean = false) {
     //style タグに使用する id
     this.STYLE_ID = 'sizing_'+Math.random().toString(36).slice(-8);
 
     //各種情報をセットする
-    this._updateInformation();
+    this._updateInformation(max);
   }
 
   /**
    * 情報を返す
    * @return {{documentWidth: number | *, documentHeight: number | *, windowHeight: number | *, ratioType: string, windowWidth: number | *, ratio: (*|number)}}
    */
-  public getInformation(): Information {
+  public getInformation(max: boolean = false): Information {
     //情報の更新
-    this._updateInformation();
+    this._updateInformation(max);
 
     //計算結果を返す
     return {
@@ -196,7 +210,7 @@ export class Sizing {
    * 各マスの width, height = windowWidth, windowHeight
    * 大枠の width, height = documentWidth, documentHeight
    */
-  public displaySizing(index: number|null = null): Coordinates {
+  public displaySizing(index: number|null = null, max: boolean = false): Coordinates {
     //index 指定が無かったら style タグを適用の後、(0, 0)を返す
     if (index === null) {
       //style タグを生成
@@ -218,7 +232,10 @@ export class Sizing {
     const coordinates = this._getScrollCoordinates(index);
 
     //overflow スタイルの適用 & transform: translate による疑似的なスクロールの実行
-    this._appendStyle('body{overflow:hidden;transform:translate('+(coordinates.x * -1)+'px,'+(coordinates.y * -1)+'px)}');
+    this._appendStyle(max
+      ? 'body{overflow:hidden;transform:translate('+(coordinates.x * -1)+'px,'+(coordinates.y * -1)+'px);width: '+this.documentWidth+'px;height: '+this.documentHeight+'px;}'
+      : 'body{overflow:hidden;transform:translate('+(coordinates.x * -1)+'px,'+(coordinates.y * -1)+'px)}'
+    );
 
     //スクロール情報を返す
     return coordinates;
