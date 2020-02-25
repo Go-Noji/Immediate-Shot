@@ -38,7 +38,7 @@ interface InitData {
 		return new Promise<InitData>(resolve => {
 			//拡張機能の設定を入手
 			new Promise<chrome.tabs.Tab>(innerResolve => {
-				chrome.tabs.query({active: true}, (tabs: chrome.tabs.Tab[]) => {
+				chrome.tabs.query({active: true, currentWindow: true}, (tabs: chrome.tabs.Tab[]) => {
 					innerResolve(tabs[0]);
 				});
 			})

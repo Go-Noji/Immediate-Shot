@@ -1,6 +1,6 @@
 {
 	"name": "Immediate Shot",
-	"version": "0.0.9",
+	"version": "0.1.0",
 	"description": "__MSG_msg_desc__",
 	"default_locale": "en",
 	"background": {
