@@ -43,6 +43,10 @@ interface InitData {
 				});
 			})
 				.then(tab => {
+					//スクロールを一瞬末尾まで移動
+					chrome.tabs.sendMessage(Number(tab.id), {type: 'scrollEnd'});
+
+					//設定を chrome から呼び出す
 					return new Promise<{tab: chrome.tabs.Tab, settings: Settings}>(innerResolve => {
 						chrome.storage.sync.get({
 								range: DEFAULT_RANGE,

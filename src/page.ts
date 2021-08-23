@@ -9,6 +9,19 @@ window.addEventListener('load', () => {
   //position: fixed を採用している要素
   let fixedElements: HTMLElement[] = [];
 
+  /**
+   * 一瞬画面の右下端にスクロールして直ぐに戻る
+   * スクロールしないと出現しない要素対策
+   */
+  const scrollEnd = () => {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    window.scroll(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.documentElement.scrollHeight - document.documentElement.clientHeight);
+    setTimeout(() => {
+      window.scroll(scrollX, scrollY);
+    }, 100);
+  };
+
   //position: fixed を採用している要素を確保する
   const getFixed = () => {
     const findStyle = new FindStyle(document.body);
@@ -66,6 +79,10 @@ window.addEventListener('load', () => {
         break;
       case 'sizing':
         sendResponse(styling(request.range, request.index, request.max));
+        break;
+      case 'scrollEnd':
+        scrollEnd();
+        sendResponse({});
         break;
       case 'killFixed':
         controlFixed('hidden');
