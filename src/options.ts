@@ -1,9 +1,10 @@
-import {DEFAULT_COUNTER, DEFAULT_MAX, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
+import {DEFAULT_COUNTER, DEFAULT_INTERVAL, DEFAULT_MAX, DEFAULT_RANGE, DEFAULT_TITLE} from "./config";
 
 //設定項目
 //range: 'full' か 'display', 'perfect'.  デフォルト値は 'full'
 //title: ダウンロードするファイル名が, ここに仕込んだ文字列+'.png' になる テンプレート変数を入れることも可能 デフォルトは {{title}}
 //counter: 上記 title に {{counter}} で仕込めるカウンターの数値
+//interval: キャプチャ間のミリ秒
 //max: true に設定してあると画面の幅・高さを取得する時に全要素をチェックする
 //テンプレート変数
 //{{title}}: タイトルタグの内容
@@ -157,11 +158,14 @@ import {DEFAULT_COUNTER, DEFAULT_MAX, DEFAULT_RANGE, DEFAULT_TITLE} from "./conf
     //設定の取得(counter)
     const counter = Number(getValue('counter'));
 
+    //設定の取得(interval)
+    const interval = Number(getValue('interval'));
+
     //設定の取得(max)
     const max = isCheckedCheckbox('max');
 
     //保存
-    chrome.storage.sync.set({range, title, counter, max}, () => {
+    chrome.storage.sync.set({range, title, counter, interval, max}, () => {
       const status = document.getElementById('status');
       if (status === null) {
         return;
@@ -181,11 +185,13 @@ import {DEFAULT_COUNTER, DEFAULT_MAX, DEFAULT_RANGE, DEFAULT_TITLE} from "./conf
       range: DEFAULT_RANGE,
       title: DEFAULT_TITLE,
       counter: DEFAULT_COUNTER,
+      interval: DEFAULT_INTERVAL,
       max: DEFAULT_MAX
     }, (items: {[key: string]: string}) => {
       setCheckedRadio(items.range);
       setValue('title', items.title);
       setValue('counter', String(items.counter));
+      setValue('interval', String(items.interval));
       setCheckedCheckbox('max', Boolean(items.max));
     });
   };

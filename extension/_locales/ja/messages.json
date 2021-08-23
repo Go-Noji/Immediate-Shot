@@ -11,6 +11,7 @@
   "msg_option_description_url": {"message": "URLに置き換わります"},
   "msg_option_description_counter": {"message": "下記'count'に置き換わります(数値は一つずつ増えていきます)"},
   "msg_option_title_counter": {"message": "カウンター(ファイル名にて{{counter}}として使用)"},
+  "msg_option_title_interval": {"message": "キャプチャ間に何ミリ秒待機するかの設定(ヒント: Chrome 92 からは 500 以上を設定しないと失敗する可能性があります)"},
   "msg_option_max": {"message": "チェックするとWebサイトの最大幅を全要素から検索するようになります(全画面スクリーンショットが上手くいかない場合にお試しください)"},
   "msg_option_save": {"message": "保存"}
 }

@@ -11,6 +11,7 @@
   "msg_option_description_url": {"message": "Replaced with URL of target page."},
   "msg_option_description_counter": {"message": "Replaced by 'counter' below. It will be incremented each time it is called."},
   "msg_option_title_counter": {"message": "File name counter(use '{{counter}}' by File name.)"},
+  "msg_option_title_interval": {"message": "Set the number of milliseconds to wait between captures (hint: starting with Chrome 92, set it to 500 or more or it may fail)"},
   "msg_option_max": {"message": "\nIf checked, the maximum width of the website will be searched from all elements (please try if the full screen screenshot does not work)"},
   "msg_option_save": {"message": "save"}
 }

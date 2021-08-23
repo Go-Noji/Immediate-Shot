@@ -41,5 +41,6 @@ export interface Settings {
   range: Range,
   title: string,
   counter: number,
+  interval: number,
   max: boolean
 }

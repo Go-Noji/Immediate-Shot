@@ -2,7 +2,7 @@ import {Information, Settings, Range} from "src/class/interface";
 import {Capturing} from "./class/Capturing";
 import {Filename} from "./class/Filename";
 import './config';
-import {CAPTURE_WAIT_MILLISECONDS, DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_MAX, DEFAULT_TITLE, FIRST_CAPTURE_WAIT_MILLISECONDS} from "./config";
+import {DEFAULT_COUNTER, DEFAULT_RANGE, DEFAULT_MAX, DEFAULT_TITLE, DEFAULT_INTERVAL} from "./config";
 
 interface InitData {
 	tab: chrome.tabs.Tab,
@@ -44,15 +44,27 @@ interface InitData {
 			})
 				.then(tab => {
 					return new Promise<{tab: chrome.tabs.Tab, settings: Settings}>(innerResolve => {
-						chrome.storage.sync.get({range: DEFAULT_RANGE, title: DEFAULT_TITLE, counter: DEFAULT_COUNTER, max: DEFAULT_MAX}, (items: {[key: string]: string}) => {
-							innerResolve({tab, settings: {range: castRange(items.range), title: String(items.title), counter: Number(items.counter), max: Boolean(items.max)}});
-						});
+						chrome.storage.sync.get({
+								range: DEFAULT_RANGE,
+								title: DEFAULT_TITLE,
+								counter: DEFAULT_COUNTER,
+								interval: DEFAULT_INTERVAL,
+								max: DEFAULT_MAX
+							},
+							(items: {[key: string]: string}) => {
+								innerResolve({tab, settings: {
+										range: castRange(items.range),
+										title: String(items.title),
+										counter: Number(items.counter),
+										interval: Number(items.interval),
+										max: Boolean(items.max)
+									}});
+							});
 					});
 				})
 				.then((data: {tab: chrome.tabs.Tab, settings: Settings}) => {
 					//現合表示しているタブの情報を入手
 					chrome.tabs.sendMessage(Number(data.tab.id), {type: 'information', max: data.settings.max}, (information: Information) => {
-					  console.log(information);
 						resolve({tab: data.tab, settings: data.settings, information});
 					});
 				});
@@ -64,7 +76,7 @@ interface InitData {
 	 * @param id
 	 * @param range
 	 */
-	const createCapture = (id: number, range: Range, index: number, max: boolean = false): Promise<void> => {
+	const createCapture = (id: number, range: Range, index: number, interval: number, max: boolean = false): Promise<void> => {
 		return  new Promise(resolve => {
 			//index === 1 (キャプチャが二回目)の場合は position: fixed の要素を非表示にする
 			if (index === 1) {
@@ -73,12 +85,20 @@ interface InitData {
 
 			//スクロール・キャプチャ
 			chrome.tabs.sendMessage(id, {type: 'sizing', range: range, index: index, max: max}, response => {
-				setTimeout(() => {
+				const callback = () => {
 					capturing.capture(response.x, response.y)
 						.then(() => {
 							resolve();
 						});
-				}, index < 2 ? FIRST_CAPTURE_WAIT_MILLISECONDS : CAPTURE_WAIT_MILLISECONDS);
+				};
+
+				if (index < 2) {
+					setTimeout(callback, 500);
+				}
+
+				else {
+					setTimeout(callback, interval);
+				}
 			});
 		});
 	};
@@ -130,7 +150,7 @@ interface InitData {
 
 		//キャプチャ処理を必要な回数だけ行う
 		for (let i = 0, max = captureNumber; i < max; i = (i + 1) | 0) {
-			await createCapture(Number(tab.id), settings.range, i, settings.max);
+			await createCapture(Number(tab.id), settings.range, i, settings.interval, settings.max);
 		}
 
 		//スタイルを元に戻す
